@@ -10,6 +10,15 @@ import random
 import matplotlib.colors as mcolors
 
 def scrape_page(url):
+    """
+    Scrapes the HTML content of a webpage.
+
+    Input:
+    - url (str): The URL of the webpage to scrape.
+
+    Output:
+    - soup (BeautifulSoup object): Parsed HTML content of the webpage.
+    """
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
@@ -18,9 +27,29 @@ def scrape_page(url):
     return soup
 
 def extract_links(soup):
+    """
+    Extracts all hyperlinks from a BeautifulSoup object.
+
+    Input:
+    - soup (BeautifulSoup object): Parsed HTML content of a webpage.
+
+    Output:
+    - links (list of str): List of URLs found in the webpage.
+    """
     return [a['href'] for a in soup.find_all('a', href=True)]
 
 def scrape_and_process(url, site_title):
+    """
+    Scrapes a webpage, extracts text and links, and processes the text.
+
+    Input:
+    - url (str): The URL of the webpage to scrape.
+    - site_title (str): The title of the site for filtering purposes.
+
+    Output:
+    - words (list of str): Filtered and tokenized words from the webpage text.
+    - links (list of str): List of URLs found in the webpage.
+    """
     soup = scrape_page(url)
     text = soup.get_text()
     links = extract_links(soup)
@@ -28,6 +57,19 @@ def scrape_and_process(url, site_title):
     return words, links
 
 def clean_and_tokenize(text, site_title):
+    """
+    Cleans and tokenizes the text from a webpage.
+
+    Input:
+    - text (str): The text content of the webpage.
+    - site_title (str): The title of the site for filtering purposes.
+
+    Changes:
+    - Filters out stopwords, the site title, and non-English words.
+
+    Output:
+    - filtered_words (list of str): List of cleaned and tokenized words.
+    """
     stop_words = set(stopwords.words('english'))
     english_words = set(words.words())
     english_names = set(names.words())
@@ -38,6 +80,15 @@ def clean_and_tokenize(text, site_title):
     return filtered_words
 
 def fetch_and_process_data(urls):
+    """
+    Fetches and processes data from multiple URLs.
+
+    Input:
+    - urls (list of dict): List of dictionaries containing 'url' and 'title' keys.
+
+    Output:
+    - all_data (dict): Dictionary with URL as keys and processed words and links as values.
+    """
     all_data = {}
     
     for entry in urls:
@@ -52,6 +103,15 @@ def fetch_and_process_data(urls):
     return all_data
 
 def assign_colors(data):
+    """
+    Assigns random colors to each URL in the data.
+
+    Input:
+    - data (dict): Dictionary with URL as keys and processed words and links as values.
+
+    Output:
+    - color_map (dict): Dictionary mapping URLs to colors.
+    """
     color_map = {}
     colors = list(mcolors.TABLEAU_COLORS.values())
     random.shuffle(colors)
@@ -60,6 +120,17 @@ def assign_colors(data):
     return color_map
 
 def create_network_graph(data, color_map, top_n=50):
+    """
+    Creates a network graph from the processed data.
+
+    Input:
+    - data (dict): Dictionary with URL as keys and processed words and links as values.
+    - color_map (dict): Dictionary mapping URLs to colors.
+    - top_n (int): Number of top words to consider for each URL.
+
+    Output:
+    - G (networkx.Graph): Network graph of words and links.
+    """
     G = nx.Graph()
     word_link_map = defaultdict(set)
     
@@ -90,6 +161,16 @@ def create_network_graph(data, color_map, top_n=50):
     return G
 
 def draw_network_graph(G, ax):
+    """
+    Draws the network graph on a matplotlib axis.
+
+    Input:
+    - G (networkx.Graph): Network graph of words and links.
+    - ax (matplotlib.axes._axes.Axes): Matplotlib axis to draw the graph on.
+
+    Output:
+    - None: The graph is drawn on the provided axis.
+    """
     ax.clear()
     ax.set_facecolor('black')
     pos = nx.spring_layout(G, k=0.15, iterations=50)
@@ -127,6 +208,12 @@ def draw_network_graph(G, ax):
     ax.axis('off')
 
 def main():
+    """
+    Main function to execute the program.
+
+    Downloads NLTK data, defines URLs, fetches and processes data,
+    assigns colors, creates and draws the network graph.
+    """
     nltk.download('stopwords')
     nltk.download('words')
     nltk.download('names')
